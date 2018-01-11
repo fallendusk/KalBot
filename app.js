@@ -17,7 +17,7 @@ client.on("ready", () => {
 
 client.on("guildMemberAdd", member => {
   if(auth.advancedMode) {
-    let code = md5(member.user + auth.serverName.slice(1, 4));
+    let code = md5(member.user + auth.serverName);
     member.user.send({embed: {
     color: 3447003,
     description: "Strife-Bot is currently set to Advanced Mode, this means you are required to verify that the Character is yours. Please follow the steps below to verify your account, if you need help please contact an Admin on " + auth.serverName + ".",
@@ -45,33 +45,88 @@ client.on("message", (message) => {
   if (!message.content.startsWith(prefix) || message.author.bot) return;
 
   if(auth.advancedMode) {
+  let code = md5(message.author + auth.serverName);
     if(message.content.startsWith(prefix + "verify")) {
       let arg = message.content.split(" ");
       let profile = arg[1];
-      let code = md5(message.user + auth.serverName.slice(1, 4));
 
+      if(auth.debugMode)
+        console.log("Attempting to fetch /character/" + profile + "/");
+
+      message.channel.send(message.author + " please wait whilst I verify your account...");
       request('https://eu.finalfantasyxiv.com/lodestone/character/' + profile + '/', function (error, response, html) {
         if (!error && response.statusCode == 200) {
-          var $ = cheerio.load(html);
-          var characterName = $('.frame__chara__name')[0].children[0].data;
-          var bioCode = $('.character__selfintroduction')[0].children[0].data.replace(/\s+/g, '');
+          let $ = cheerio.load(html);
+          let characterName = $('.frame__chara__name')[0].children[0].data;
+          let bioCode = $('.character__selfintroduction')[0].children[0].data.replace(/\s+/g, '');
+          let role;
+
+          if(auth.debugMode)
+            console.log(message.author.username+" has retrieved the Character: "+characterName);
+
+          if(auth.rolesToGive[characterName] !== null) {
+            role = message.guild.roles.find("name", auth.rolesToGive[characterName]);
+          } else {
+            role = message.guild.roles.find("name", auth.role);
+          }
+
+          if(auth.debugMode)
+            console.log("Role for "+message.author.username+" is found to be "+role);
+
           if(bioCode.indexOf(code) !== -1) {
+            if(auth.debugMode)
+              console.log("Begin Nickname Change");
+
             message.member.setNickname(characterName).catch(console.error);
-            let role = message.guild.roles.find("name", auth.role);
+
+            if(auth.debugMode)
+              console.log("Finish Nickname Change\r\nBegin Role Change");
+
+            setTimeout(function() { console.log(message.author.username+" has linked their account to " + characterName); }, 250);
             message.member.addRole(role).catch(console.error);
+
+            if(auth.debugMode)
+              console.log("Finish Role Change");
           } else {
             message.channel.send(message.author + " I'm sorry but I could not verify your profile, please contact an Admin.");
           }
+        } else {
+          console.error(error);
         }
       });
     }
   } else {
     if(message.content.startsWith(prefix + "iam")) {
       let arg = message.content.split(" ");
-      let name = capitalizeFirstLetter(arg[2]) + " " + capitalizeFirstLetter(arg[3]);
+      let characterName = capitalizeFirstLetter(arg[2]) + " " + capitalizeFirstLetter(arg[3]);
+
+      let role;
+
+      if(auth.debugMode)
+        console.log(message.author.username+" has chosen the Character: "+characterName);
+
+      if(auth.rolesToGive[characterName] !== null) {
+        role = message.guild.roles.find("name", auth.rolesToGive[characterName]);
+      } else {
+        role = message.guild.roles.find("name", auth.role);
+      }
+
+      if(auth.debugMode)
+        console.log("Role for "+message.author.username+" is found to be "+role);
+
+      if(auth.debugMode)
+        console.log("Begin Nickname Change");
+
       message.member.setNickname(name).catch(console.error);
-      let role = message.guild.roles.find("name", auth.role);
+
+      if(auth.debugMode)
+        console.log("Finish Nickname Change\r\nBegin Role Change");
+
+      setTimeout(function() { console.log(message.author.username+" has verified their account."); }, 250);
       message.member.addRole(role).catch(console.error);
+
+      if(auth.debugMode)
+        console.log("Finish Role Change");
     }
 }
 });
