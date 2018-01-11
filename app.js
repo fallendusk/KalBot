@@ -105,11 +105,11 @@ client.on("message", (message) => {
       if(auth.debugMode)
         console.log(message.author.username+" has chosen the Character: "+characterName);
 
-      if(auth.rolesToGive[characterName] !== null) {
-        role = message.guild.roles.find("name", auth.rolesToGive[characterName]);
-      } else {
-        role = message.guild.roles.find("name", auth.role);
-      }
+      //if(auth.rolesToGive[characterName] !== null) {
+      //  role = message.guild.roles.find("name", auth.rolesToGive[characterName]);
+      //} else {
+      role = message.guild.roles.find("name", auth.defaultRole);
+     // }
 
       if(auth.debugMode)
         console.log("Role for "+message.author.username+" is found to be "+role);
@@ -117,7 +117,7 @@ client.on("message", (message) => {
       if(auth.debugMode)
         console.log("Begin Nickname Change");
 
-      message.member.setNickname(name).catch(console.error);
+      message.member.setNickname(characterName).catch(console.error);
 
       if(auth.debugMode)
         console.log("Finish Nickname Change\r\nBegin Role Change");
