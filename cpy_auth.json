@@ -1,7 +1,0 @@
-{
-  "token": "BOT_TOKEN_HERE",
-  "serverName": "YOUR_SERVERS_NAME",
-  "channel": "CHANNEL_ID",
-  "role": "ROLE_NAME",
-  "advancedMode": false
-}

@@ -6,9 +6,13 @@ var md5 = require('md5');
 const auth = require('./auth.json');
 var prefix = "!";
 
+function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
 client.on("ready", () => {
   console.log("Waiting...");
-  client.user.setGame("FINAL FANTASY XIV - A Realm Reborn");
+  client.user.setGame("<3");
 });
 
 client.on("guildMemberAdd", member => {
@@ -33,7 +37,7 @@ client.on("guildMemberAdd", member => {
   });
   } else {
     let channel = client.channels.get(auth.channel);
-    channel.send("<@"+member.user.id+"> please set your Discord Nickname to your FFXIV Character Name with `!name Firstname Secondname` to gain access to the Member Areas.").catch(console.error);
+    channel.send("Welcome <@"+member.user.id+">! Please set your in-game character with !iam diabolos firstname lastname").catch(console.error);
   }
 });
 
@@ -62,9 +66,9 @@ client.on("message", (message) => {
       });
     }
   } else {
-    if(message.content.startsWith(prefix + "name")) {
+    if(message.content.startsWith(prefix + "iam")) {
       let arg = message.content.split(" ");
-      let name = arg[1] + " " + arg[2];
+      let name = capitalizeFirstLetter(arg[2]) + " " + capitalizeFirstLetter(arg[3]);
       message.member.setNickname(name).catch(console.error);
       let role = message.guild.roles.find("name", auth.role);
       message.member.addRole(role).catch(console.error);
