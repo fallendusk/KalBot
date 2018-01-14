@@ -51,8 +51,10 @@ client.on("message", (message) => {
 
     if (auth.debugMode) console.log("Finish Nickname Change\r\nBegin Role Change");
 
-    setTimeout(function() { console.log(`${message.author.username} has verified their account.`); }, 250);
-    message.member.addRole(role).catch(console.error);
+    setTimeout(() => { 
+      console.log(`${message.author.username} has verified their account.`);
+      message.member.addRole(role).catch(console.error);
+  }, 5000);
     
     message.channel.send(`<@${message.author.id}> authenticated as **${characterName}**`);
 
