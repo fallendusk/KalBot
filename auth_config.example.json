@@ -1,6 +1,5 @@
 {
   "token": "BOT_TOKEN_HERE",
-  "advancedMode": false,
   "debugMode": false,
   "serverName": "YOUR_SERVERS_NAME",
   "channel": "CHANNEL_ID",
