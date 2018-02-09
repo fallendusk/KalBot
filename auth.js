@@ -24,9 +24,9 @@ exports.run = (client, message, args) => {
     let role = message.guild.roles.find("name", config.defaultRole);
 
     if (config.debugMode) {
-    console.log(`${message.author.username} has chosen the Character: ${characterName}`);
-    console.log(`Role for ${message.author.username} is found to be ${role}`);
-    console.log('Begin Nickname Change');
+        console.log(`${message.author.username} has chosen the Character: ${characterName}`);
+        console.log(`Role for ${message.author.username} is found to be ${role}`);
+        console.log('Begin Nickname Change');
     }
 
     message.member.setNickname(characterName).catch(console.error);
@@ -40,6 +40,5 @@ exports.run = (client, message, args) => {
 
     message.channel.send(`<@${message.author.id}> authenticated as **${characterName}**`);
 
-    if (config.debugMode)
-    console.log('Finish Role Change');
+    if (config.debugMode) console.log('Finish Role Change');
 }
