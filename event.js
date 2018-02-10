@@ -1,4 +1,5 @@
 const moment = require('moment');
+const database = require('./database.js');
 
 const eventCreate = (msg, args) => {
     console.log("DEBUG: eventCreate function");
@@ -46,33 +47,56 @@ const eventCreate = (msg, args) => {
         msg.channel.send('End date format is invalid, use MM-DD-YYYY HH:MM AM|PM');
         return;
     }
+    
+    //eventargs.id = 42; // example only
+    // Save the valid event to db
+    database.sequelize.sync().then(() => {
+        database.events.create({
+            name: eventargs.name,
+            desc: eventargs.desc,
+            location: eventargs.location,
+            startDate: eventargs.start.format(),
+            endDate: eventargs.end.format(),
+            owner: `${msg.member}`
+        }).then((result) => {
+            console.log("DEBUG: event saved");
+            const e = result.get({plain:true});
+            msg.channel.send(`Signup for this event with *!e attend ${e.id}* in the #events channel`, {embed:
+                {
+                  title: e.name,
+                  description: e.desc,
+                  color: 14775573,
+                  thumbnail: {
+                    url: 'https://cdn4.iconfinder.com/data/icons/small-n-flat/24/calendar-512.png',
+                  },
+                  fields: [
+                    {
+                      name: 'Location',
+                      value: e.location,
+                    },
+                    {
+                      name: 'Event Start',
+                      value: `${moment(e.startDate).format('MMM D, YYYY h:mmA')} (UTC${moment(e.startDate).format('ZZ')})`,
+                      //value: eventargs.start,
+                    },
+                    {
+                      name: 'Event End',
+                      value: `${moment(e.endDate).format('MMM D, YYYY h:mmA')} (UTC${moment(e.endDate).format('ZZ')})`,
+                      //value: eventargs.end,
+                    },
+                    {
+                        name: 'Event Id',
+                        value: e.id
+                    },
+                  ],
+                },
+                }).catch(console.error);
+        })
+    });
 
-    msg.channel.send({embed:
-        {
-          title: eventargs.name,
-          description: eventargs.desc,
-          color: 14775573,
-          thumbnail: {
-            url: 'https://cdn4.iconfinder.com/data/icons/small-n-flat/24/calendar-512.png',
-          },
-          fields: [
-            {
-              name: 'Location',
-              value: eventargs.location,
-            },
-            {
-              name: 'Event Start',
-              value: `${eventargs.start.format('MMM D, YYYY h:mmA')} (UTC${eventargs.start.format('ZZ')})`,
-              //value: eventargs.start,
-            },
-            {
-              name: 'Event End',
-              value: `${eventargs.end.format('MMM D, YYYY h:mmA')} (UTC${eventargs.end.format('ZZ')})`,
-              //value: eventargs.end,
-            },
-          ],
-        },
-        }).catch(console.error);
+
+
+
 };
 const eventAttend = (msg, args) => {
     console.log("DEBUG: eventAttend function");
