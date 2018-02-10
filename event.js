@@ -1,7 +1,9 @@
+const moment = require('moment');
+
 const eventCreate = (msg, args) => {
     console.log("DEBUG: eventCreate function");
     msg.channel.send("DEBUG: eventCreate function");
-    
+
     const regex = / *(?:-+([^= \'\"]+)[= ]?)?(?:([\'\"])([^\2]+?)\2|([^- \"\']+))?/g;
     let m;
     let eventargs = {};
@@ -20,6 +22,31 @@ const eventCreate = (msg, args) => {
     }
 
     console.log(`DEBUG: ${eventargs}`);
+
+    // Check for valid input
+    let argumentErrors = [];
+    const requiredArgs = ['name', 'desc', 'location', 'start', 'end'];
+    for (let a of requiredArgs) {
+        if (eventargs[a] === undefined) {
+            argumentErrors.push(`--${a}`);
+        }
+    }
+    if (argumentErrors.length > 0) {
+        msg.channel.send(`Missing argument(s): ${argumentErrors.join(', ')}`);
+        return;
+    }
+    eventargs.start = moment(eventargs.start);
+    eventargs.end = moment(eventargs.end);
+
+    if (!eventargs.start.isValid()) {
+        msg.channel.send('Start date format is invalid, use MM-DD-YYYY HH:MM AM|PM');
+        return;
+    }
+    if (!eventargs.end.isValid()) {
+        msg.channel.send('End date format is invalid, use MM-DD-YYYY HH:MM AM|PM');
+        return;
+    }
+
     msg.channel.send({embed:
         {
           title: eventargs.name,
@@ -35,13 +62,13 @@ const eventCreate = (msg, args) => {
             },
             {
               name: 'Event Start',
-              //value: `${startDate.format('MMM D, YYYY h:mmA')} (UTC${startDate.format('ZZ')})`,
-              value: eventargs.start,
+              value: `${eventargs.start.format('MMM D, YYYY h:mmA')} (UTC${eventargs.start.format('ZZ')})`,
+              //value: eventargs.start,
             },
             {
               name: 'Event End',
-              //value: `${endDate.format('MMM D, YYYY h:mmA')} (UTC${endDate.format('ZZ')})`,
-              value: eventargs.end,
+              value: `${eventargs.end.format('MMM D, YYYY h:mmA')} (UTC${eventargs.end.format('ZZ')})`,
+              //value: eventargs.end,
             },
           ],
         },

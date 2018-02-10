@@ -5,11 +5,12 @@
   "main": "app.js",
   "author": "Greg Helton",
   "repository": {
-	"type": "git",
-	"url": "https://github.com/fallendusk/KalBot"
-},
+    "type": "git",
+    "url": "https://github.com/fallendusk/KalBot"
+  },
   "license": "Apache-2.0",
   "dependencies": {
-    "discord.js": "^11.2.1"
+    "discord.js": "^11.2.1",
+    "moment": "^2.20.1"
   }
 }
