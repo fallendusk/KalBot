@@ -1,6 +1,42 @@
 const moment = require('moment');
 const database = require('./database.js');
+const Discord = require('discord.js');
 
+const eventSendEmbed = (msg, e) => {
+    msg.channel.send({embed:
+        {
+          title: e.name,
+          description: e.desc,
+          color: 14775573,
+          thumbnail: {
+            url: 'https://cdn4.iconfinder.com/data/icons/small-n-flat/24/calendar-512.png',
+          },
+          footer: {
+              text: `Signup for this event with !e attend ${e.id} in the #events channel`
+          },
+          fields: [
+            {
+              name: 'Location',
+              value: e.location,
+            },
+            {
+              name: 'Event Start',
+              value: `${moment(e.startDate).format('MMM D, YYYY h:mmA')} (UTC${moment(e.startDate).format('ZZ')})`,
+              //value: eventargs.start,
+            },
+            {
+              name: 'Event End',
+              value: `${moment(e.endDate).format('MMM D, YYYY h:mmA')} (UTC${moment(e.endDate).format('ZZ')})`,
+              //value: eventargs.end,
+            },
+            {
+                name: 'Event Id',
+                value: e.id
+            },
+          ],
+        },
+        }).catch(console.error);
+};
 const eventCreate = (msg, args) => {
     console.log("DEBUG: eventCreate function");
     msg.channel.send("DEBUG: eventCreate function");
@@ -61,42 +97,9 @@ const eventCreate = (msg, args) => {
         }).then((result) => {
             console.log("DEBUG: event saved");
             const e = result.get({plain:true});
-            msg.channel.send(`Signup for this event with *!e attend ${e.id}* in the #events channel`, {embed:
-                {
-                  title: e.name,
-                  description: e.desc,
-                  color: 14775573,
-                  thumbnail: {
-                    url: 'https://cdn4.iconfinder.com/data/icons/small-n-flat/24/calendar-512.png',
-                  },
-                  fields: [
-                    {
-                      name: 'Location',
-                      value: e.location,
-                    },
-                    {
-                      name: 'Event Start',
-                      value: `${moment(e.startDate).format('MMM D, YYYY h:mmA')} (UTC${moment(e.startDate).format('ZZ')})`,
-                      //value: eventargs.start,
-                    },
-                    {
-                      name: 'Event End',
-                      value: `${moment(e.endDate).format('MMM D, YYYY h:mmA')} (UTC${moment(e.endDate).format('ZZ')})`,
-                      //value: eventargs.end,
-                    },
-                    {
-                        name: 'Event Id',
-                        value: e.id
-                    },
-                  ],
-                },
-                }).catch(console.error);
-        })
+            eventSendEmbed(msg, e);
+        });
     });
-
-
-
-
 };
 const eventAttend = (msg, args) => {
     console.log("DEBUG: eventAttend function");
@@ -117,6 +120,64 @@ const eventModify = (msg, args) => {
 const eventList = (msg, args) => {    
     console.log("DEBUG: eventList function");
     msg.channel.send("DEBUG: eventList function");
+
+    // if event id was passed with command, list only that event
+    let eventId = args.shift();
+    if (!isNaN(eventId))
+    {
+        database.sequelize.sync().then(() =>{
+            database.events.find({
+                where: {
+                    id: eventId,
+                },
+                limit: 1,
+                raw: true 
+            }).then((result) => {
+                eventSendEmbed(msg, result);
+            }).catch((err) => {
+                console.log("ERROR: " + err);
+            });
+        });
+        return;
+    };
+
+    // otherwise grab next 5 events 
+    const eventLimit = 5;
+    database.sequelize.sync().then(() => {
+        database.events.findAll
+        ({
+            where: {
+                startDate: {
+                    $gte: moment().toDate()
+                }
+            },
+            limit: eventLimit,
+            raw: true
+        }).then((result) => {
+            let eventList = result;
+            console.log("DEBUG: "+ eventList);
+            let embedFields = [];
+
+            for (let e of eventList) {
+                embedFields.push({name:`${e.id}: ${e.name} (${moment(e.startDate).format("MMM D, YYYY h:mmA")})`, value: e.desc});
+            }
+
+            msg.channel.send({embed: {
+                title: 'Upcoming Events',
+                color: 14775573,
+                thumbnail: {
+                    url: 'https://cdn4.iconfinder.com/data/icons/small-n-flat/24/calendar-512.png',
+                  },
+                fields: embedFields,
+                footer: {
+                    text: 'Type !e list <id> in the #events channel to view full event details'
+                }
+            }});
+
+        }).catch((err) => {
+            console.log("ERROR: " + err);
+        })
+    });
 };
 
 exports.run = (client, message, args) => {
