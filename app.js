@@ -1,6 +1,7 @@
 /*jshint esversion: 6 */
 const Discord = require("discord.js");
 const client = new Discord.Client();
+const database = require('./database.js');
 var prefix = "!";
 
 // require command functions
@@ -8,9 +9,19 @@ const auth = require('./auth.js');
 const kal = require('./kal.js');
 const events = require('./event.js');
 
-client.on("ready", () => {
+client.on("ready", async () => {
   console.log('KalBot connected.');
-  client.user.setGame('<3');
+  client.user.setActivity('<3');
+
+  // sync db tables
+  await database.sequelize.sync();
+
+  // Run tasks on ready then setup 5min cron timer
+  events.cron(client);
+  let cron = setInterval(() => {
+    console.log("DEBUG: Executing cron tasks");
+    events.cron(client);
+  }, 300*1000);
 });
 
 client.on("guildMemberAdd", member => {

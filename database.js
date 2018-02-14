@@ -19,7 +19,11 @@ db.events = sequelize.define('event', {
     location: Sequelize.STRING,
     startDate: Sequelize.DATE,
     endDate: Sequelize.DATE,
-    owner: Sequelize.STRING
+    owner: Sequelize.STRING,
+    announced: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+    }
 });
 
-module.exports = db;    
+module.exports = db;
