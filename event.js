@@ -28,9 +28,9 @@ const eventEmbed = (e) => {
         thumbnail: {
           url: 'https://cdn4.iconfinder.com/data/icons/small-n-flat/24/calendar-512.png',
         },
-        footer: {
-            text: `Signup for this event with !e attend ${e.id} in the #events channel`
-        },
+        // footer: {
+        //     text: `Signup for this event with !e attend ${e.id} in the #events channel`
+        // },
         fields: [
           {
             name: 'Location',
@@ -147,14 +147,33 @@ const eventCancel = (msg, args) => {
     console.log("DEBUG: eventCancel function");
     msg.channel.send("DEBUG: eventCancel function");
 };
-const eventDelete = (msg, args) => {
+const eventDelete = async (msg, args) => {
     console.log("DEBUG: eventDelete function");
-    msg.channel.send("DEBUG: eventDelete function");
         // Check if member has event permissions
     if (!hasEventAdminPermission(msg)) {
         msg.channel.send('Event creation/modification is disabled for your role.');
         return;
     }
+
+    let eventId = args.shift();
+    if (isNaN(eventId)) {
+        msg.channel.send('Missing or invalid event id');
+        return;        
+    }
+
+    // Try to grab the specified event from the database
+    let eventResult = await database.events.findById(eventId, {plain: true});
+    if (!eventResult) {
+        msg.channel.send("Couldn't find specified event, check your id and try again.");
+        return;
+    }
+
+    eventResult.destroy().then(() => {
+        msg.channel.send(`Event ${eventId} deleted.`);
+    }).catch((err) => {
+        console.log(`ERROR: ${err}`);
+        msg.channel.send(`An error occured deleting the event. ${err}`);
+    });
 };
 const eventModify = async (msg, args) => {
     console.log("DEBUG: eventModify function");
@@ -314,7 +333,7 @@ exports.cron = async (client) => {
             database.events.update({
                 announced: true
             }, { where: { id: results[r].id}});
-            announceChannel.send('An upcoming event starts in < 15 minutes!', eventEmbed(results[r])).catch(console.error);
+            announceChannel.send('<@everyone> An upcoming event starts in < 15 minutes!', eventEmbed(results[r])).catch(console.error);
         }
     }
 };
