@@ -1,0 +1,19 @@
+<html>
+    <head>
+        <link rel='stylesheet' href='fullcalendar/fullcalendar.css' />
+        <script src='fullcalendar/lib/jquery.min.js'></script>
+        <script src='fullcalendar/lib/moment.min.js'></script>
+        <script src='fullcalendar/fullcalendar.js'></script>
+
+    </head>
+    <body>
+        <script>
+            $(document).ready(function() {
+                $('#calendar').fullCalendar({
+                    events: 'http://localhost:3000/events'
+                })
+            });
+        </script>
+        <div id="calendar"></div>
+    </body>
+</html>

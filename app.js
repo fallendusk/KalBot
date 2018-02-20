@@ -1,13 +1,16 @@
 /*jshint esversion: 6 */
 const Discord = require("discord.js");
+const express = require('express');
 const client = new Discord.Client();
+const api = express();
+const cors = require('cors');
 const database = require('./database.js');
 var prefix = "!";
 
 // require command functions
 const auth = require('./auth.js');
 const kal = require('./kal.js');
-const events = require('./event.js');
+const events = require('./events');
 
 client.on("ready", async () => {
   console.log('KalBot connected.');
@@ -17,10 +20,10 @@ client.on("ready", async () => {
   await database.sequelize.sync();
 
   // Run tasks on ready then setup 5min cron timer
-  events.cron(client);
+  events.cron(database, client);
   let cron = setInterval(() => {
     console.log("DEBUG: Executing cron tasks");
-    events.cron(client);
+    events.cron(database, client);
   }, 300*1000);
 });
 
@@ -42,9 +45,15 @@ client.on("message", (message) => {
   }
 
   if (command === 'e') {
-    events.run(client, message, args);
+    events.run(database, client, message, args);
   }
   
 });
 
 client.login(auth.token);
+
+api.use(cors());
+api.use(require('./api'));
+api.listen(3000, () => {
+  console.log('KalBot API listening on port 3000');
+});
