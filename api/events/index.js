@@ -13,6 +13,12 @@ router.get('/', async (req, res) => {
         ],
         raw: true
     });
+
+    for(let e in events) {
+        events[e].start = new Date(events[e].start);
+        events[e].end = new Date(events[e].end);
+        events[e].allDay = false;
+    }
     res.json(events);
 });
 

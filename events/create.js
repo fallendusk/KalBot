@@ -56,9 +56,9 @@ exports.eventCreate = (database, msg, args) => {
         const e = result.get({plain:true});
         common.eventSendEmbed(msg, e);
         
-        let announceChannel = msg.guild.channels.get(common.config.announceChannel);
-        announceChannel.send('A new event has been announced!', common.eventEmbed(e)).catch(console.error);
-            // send an announcement to the announcements channel
+        //let announceChannel = msg.guild.channels.get(common.config.announceChannel);
+        //announceChannel.send('A new event has been announced!', common.eventEmbed(e)).catch(console.error);
+        // send an announcement to the announcements channel
 
     });
 };

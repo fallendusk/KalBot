@@ -13,7 +13,7 @@ const kal = require('./kal.js');
 const events = require('./events');
 
 client.on("ready", async () => {
-  console.log('KalBot connected.');
+  console.log('KalBot connected to Discord.');
   client.user.setActivity('<3');
 
   // sync db tables
