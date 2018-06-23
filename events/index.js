@@ -37,7 +37,7 @@ exports.cron = async (database, client) => {
             database.events.update({
                 announced: true
             }, { where: { id: results[r].id}});
-            announceChannel.send('<@everyone> An upcoming event starts in < 15 minutes!', eventEmbed(results[r])).catch(console.error);
+            announceChannel.send('An upcoming event starts in < 15 minutes!', eventEmbed(results[r])).catch(console.error);
         }
     }
 };

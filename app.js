@@ -14,6 +14,8 @@ const events = require('./events');
 
 client.on("ready", async () => {
   console.log('KalBot connected to Discord.');
+  console.log(`Serving ${client.users.size} users, in ${client.channels.size} channels of ${client.guilds.size} guilds`);
+
   client.user.setActivity('<3');
 
   // sync db tables
@@ -25,6 +27,20 @@ client.on("ready", async () => {
     console.log("DEBUG: Executing cron tasks");
     events.cron(database, client);
   }, 300*1000);
+});
+
+
+client.on("guildCreate", guild => {
+  console.log(`New guild joined: ${guild.name} (id: ${guild.id}). This guild has ${guild.memberCount} members!`);
+  database.guilds.create({
+    guild_id: guild.id
+  }).then((r) => {
+    console.log(`DEBUG: Gui`)
+  })
+});
+
+client.on("guildDelete", guild => {
+  console.log(`I have been removed from: ${guild.name} (id: ${guild.id})`);
 });
 
 client.on("guildMemberAdd", member => {
