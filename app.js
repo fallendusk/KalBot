@@ -19,7 +19,7 @@ client.on("ready", async () => {
   client.user.setActivity('<3');
 
   // sync db tables
-  await database.sequelize.sync();
+  await database.sequelize.sync({force: false});
 
   // Run tasks on ready then setup 5min cron timer
   events.cron(database, client);
@@ -35,7 +35,7 @@ client.on("guildCreate", guild => {
   database.guilds.create({
     guild_id: guild.id
   }).then((r) => {
-    console.log(`DEBUG: Gui`)
+    console.log(`[DEBUG] Saved ${guild.id} to database.`)
   })
 });
 
@@ -53,7 +53,7 @@ client.on("message", (message) => {
   const command = args.shift().toLowerCase();
 
   if (command === 'kal') {
-    kal.run(client, message, args);
+    kal.run(database, client, message, args);
   }
 
   if (command === 'iam') {

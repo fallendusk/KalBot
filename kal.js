@@ -3,7 +3,7 @@ const moment = require("moment");
 const Discord = require("discord.js");
 require("moment-duration-format");
 
-exports.run = (client, message, args) => {
+exports.run = (database, client, message, args) => {
   let subcommand = args.shift();
   switch (subcommand) {
       case "setup":
@@ -38,12 +38,49 @@ exports.run = (client, message, args) => {
            }, {
              where: { guild_id: message.guild.id }
            }).then((r) => {
-              message.send(`Authentication mode set to **${auth_mode}**`);
+              message.channel.send(`Authentication mode set to **${auth_mode}**`);
+              console.log(`[DEBUG] Authentication mode set to ${auth_mode} for guild ${message.guild.id}`);
            });
            break;
           
           case "defaultRole":
+           let defaultRole = args.join(' ');
+           database.guilds.update({
+             defaultRole: defaultRole
+           }, {
+             where: { guild_id: message.guild.id }
+           }).then((r) => {
+             message.channel.send(`Authenticated users will be placed in **${defaultRole}**`);
+             console.log(`[DEBUG] Default auth role set to ${defaultRole} for guild ${message.guild.id}`);
+           });
+           break;
+          
+          case "welcomeChannel":
+           let welcomeChannel = args.shift();
+           database.guilds.update({
+             auth_channel: welcomeChannel
+           }, {
+             where: { guild_id: message.guild.id }
+           }).then((r) => {
+             message.channel.send(`Authentication Channel set to ${welcomeChannel}`);
+             console.log(`[DEBUG] auth channel set to ${welcomeChannel} for guild ${message.guild.id}`);
+           });
+           break;
+
+          case "announceChannel":
+            let announceChannel = args.shift();
+            database.guilds.update({
+              announceChannel: announceChannel
+            }, {
+              where: { guild_id: message.guild.id }
+            }).then((r) => {
+              message.channel.send(`Event announcement channel set to ${announceChannel}`);
+              console.log(`[DEBUG] announce channel set to ${announceChannel} for guild ${message.guild.id}`);
+            });
+            break;
         }
+      break;
+      
       case "stats":
         const duration = moment.duration(client.uptime).format(" D [days], H [hrs], m [mins], s [secs]");
           message.channel.send({embed: {
